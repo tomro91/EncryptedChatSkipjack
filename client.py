@@ -49,13 +49,24 @@ def main_func(username):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
 
-                                    
+    def decrypt(msg):
+        return "word"                               
+    def encrypt(msg):
+        x=msg.split(':')
+        print(x)
         
+        return "tom"
     #send message in the chat
     #need to add encryption
     def sendMessage (username,*args):
         u = username.split()[0]
-        msg = u + ' : '+msg_entry.get()
+        global msg1
+        msg1=msg_entry.get()
+        global msg2
+        msg2=encrypt(msg1)
+        print("encrypt:"+msg2)
+        
+        msg = u + ' : '+msg2
         global c
         c.send(msg.encode('ascii'))
     #recieve message in the chat
@@ -63,7 +74,18 @@ def main_func(username):
     def recievingMessage (c): 
         while True :
             msg=c.recv(2048).decode('ascii')
+            print(msg)
+            x=msg.split(':')
+            if len(x)==2:
+                global msg3
+                msg3=decrypt(x[1])
+                global msg4
+                msg4=x[0]+":"+msg3
+                
+            
+            #new client log in
             if 'new980' in msg:
+                
                 msg = msg.split('@')
                 msg.pop(-1)
                 list_insert(msg)
@@ -71,8 +93,10 @@ def main_func(username):
                     client_name.append(i)
                
                 
-
+               #client log out
             elif 'gone980' in msg:
+                
+                
                 msg = msg.split('@')
                 msg.pop(-1)
                 list_insert(msg)
@@ -81,9 +105,11 @@ def main_func(username):
                 
 
             else:
+               
+                
                 t = text.get(1.0,END)
                 text.delete(1.0,END)
-                text.insert(INSERT,t+msg+'\n')
+                text.insert(INSERT,t+msg4+'\n')
                 text.yview('end')
                
 

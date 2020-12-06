@@ -4,6 +4,7 @@ import client
 import _thread
 from csv import DictReader
 import csv
+import sys
 #login screen-need to add two levels password
 def login():
     reg.destroy()
