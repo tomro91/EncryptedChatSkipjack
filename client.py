@@ -111,7 +111,7 @@ def main_func(username):
     win = Toplevel()
     win.geometry('530x400')
     win.resizable(0,0)
-    win.title(f'Chat\{username}')
+    win.title('Chat\{username}')
 
     Label(win, text='Chat',bg='white', font=('arial black',13),width=50,height=1).pack()
 

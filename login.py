@@ -46,7 +46,6 @@ def login():
             l1.append(row['name'])
             l1.append(row['username'])
             l1.append(row['password'])
-            l1.append(row['avatar'])
             l.append(l1)
 
         user = user_entry.get()
@@ -136,7 +135,6 @@ def register():
             l1.append(row['name'])
             l1.append(row['username'])
             l1.append(row['password'])
-            l1.append(row['avatar'])
             l_c.append(l1)
 
         name = name_entry.get().title()
@@ -185,7 +183,7 @@ def register():
     submit = Button(reg, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=reg_func,bd=0,fg='white')
     submit.place(x=10, y=240)
 
-    Label(reg, text='Already Had A Account.',bg='white').place(x=30,y=275)
+    Label(reg, text='Already Had An Account?',bg='white').place(x=30,y=275)
 
     Button(reg,text='Log_In',font=('',10,'underline'),bg='white',fg='blue',command=login).place(x=170,y=270)
 
