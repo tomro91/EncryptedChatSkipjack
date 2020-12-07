@@ -26,7 +26,8 @@ def connectNewClient(c):
                clients_l.pop(clients_l.index(msg))
                msgs = ','.join(clients_l)
                sendToAll(msgs+'@gone980',c)
-
+          elif 'no premissions to send messages' in msgf:
+                 print("there is no premissions")#change in the future to pop-up
                
 
           else:

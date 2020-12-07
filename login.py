@@ -2,12 +2,19 @@ from tkinter import *
 from tkinter import messagebox as mb
 import client
 import _thread
+import random
 from csv import DictReader
 import csv
 import sys
-#login screen-need to add two levels password
+
+
+#login screen
 def login():
-    reg.destroy()
+    try:
+        reg.destroy()
+    except:
+        pass
+    
     global log
     log = Tk()
     log.title('Login')
@@ -36,7 +43,7 @@ def login():
 
     
 
-    
+    #login function
     def log_func(*args):
 
         f = open('resources/log_details.csv', 'r')
@@ -51,7 +58,7 @@ def login():
 
         user = user_entry.get()
         password = pass_entry.get()
-
+        #validate user
         for i in l:
             print(i[1])
             if i[1] == user:
@@ -156,7 +163,7 @@ def register():
             if ex_t == True:
                 mb.showerror('Register',f'{user} Already Exist.')
             else:
-                to_write = [name,user,password,'0.png']
+                to_write = [name,user,hash(password),random.randint(0,1)]
                 with open('resources/log_details.csv','a') as csvFile:
                     writer = csv.writer(csvFile)
                     writer.writerow(to_write)
@@ -195,6 +202,6 @@ def register():
 
 
 
-register()
+login()
 
 

@@ -48,27 +48,41 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
-
+    #encryption function-change
+    def encrypt(msg):
+        return "code"   
+    #decryption function-change          
     def decrypt(msg):
         return "word"                               
-    def encrypt(msg):
-        x=msg.split(':')
-        print(x)
-        
-        return "tom"
+   
     #send message in the chat
-    #need to add encryption
     def sendMessage (username,*args):
-        u = username.split()[0]
-        global msg1
-        msg1=msg_entry.get()
-        global msg2
-        msg2=encrypt(msg1)
-        print("encrypt:"+msg2)
-        
-        msg = u + ' : '+msg2
-        global c
-        c.send(msg.encode('ascii'))
+        f = open('resources/log_details.csv', 'r')
+        r = DictReader(f)
+        l = []
+        for row in r:
+            l1 = []
+            l1.append(row['name'])
+            l1.append(row['username'])
+            l1.append(row['password'])
+            l1.append(row['permission'])
+            l.append(l1)
+        for i in l:
+            if i[0] == username:
+                print("hey"+i[3])
+                if i[3]=="1":
+                    u = username.split()[0]
+                    global msg1
+                    msg1=msg_entry.get()
+                    global msg2
+                    msg2=encrypt(msg1)
+                    msg = u + ' : '+msg2
+                    global c
+                    c.send(msg.encode('ascii'))
+                else:
+                    msg="no premissions to send messages"
+                    c.send(msg.encode('ascii'))
+                    
     #recieve message in the chat
     #need to add decryption
     def recievingMessage (c): 
@@ -105,8 +119,6 @@ def main_func(username):
                 
 
             else:
-               
-                
                 t = text.get(1.0,END)
                 text.delete(1.0,END)
                 text.insert(INSERT,t+msg4+'\n')
