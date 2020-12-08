@@ -116,8 +116,9 @@ def main_func(username):
                 list_insert(msg)
                 for i in msg:
                     client_name.append(i)
-                
-
+            elif 'there is no premissions'in msg:
+               
+               messagebox.showinfo("information","User does not have premissions to send messages!")  
             else:
                 t = text.get(1.0,END)
                 text.delete(1.0,END)

@@ -10,6 +10,7 @@ clients=[]
 clients_l = []
 
 def connectNewClient(c):
+  
      while True:
           msgf = c.recv(2048).decode('ascii')
           if 'new980' in msgf:
@@ -27,7 +28,9 @@ def connectNewClient(c):
                msgs = ','.join(clients_l)
                sendToAll(msgs+'@gone980',c)
           elif 'no premissions to send messages' in msgf:
-                 print("there is no premissions")#change in the future to pop-up
+              msg1= "there is no premissions"
+              c.send(msg1.encode('ascii'))
+              
                
 
           else:
