@@ -145,14 +145,14 @@ def main_func(username):
         _thread.start_new_thread(recievingMessage, (c,) )
 
 
-
+    #client GUI-chat window
 
     win = Toplevel()
     win.geometry('530x400')
     win.resizable(0,0)
-    win.title('Chat\{username}')
+    win.title('Chat')
 
-    Label(win, text='Chat',bg='white', font=('arial black',13),width=50,height=1).pack()
+    Label(win, text='Chat',bg='white', font=('arial black',18),width=50,height=1).pack()
 
     
     

@@ -10,6 +10,7 @@ import sys
 
 #login screen
 def login():
+    #login GUI-login screen
     try:
         reg.destroy()
     except:
@@ -40,9 +41,18 @@ def login():
 
     resp = Label(log, text='',font=('Arial Black',10,'bold'),bg='white')
     resp.place(x=10, y=250)
+    submit = Button(log, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=log_func,bd=0,fg='white')
+    submit.place(x=10, y=180)
 
+    Label(log, text='Dont\'t Have An Account.',bg='white').place(x=30,y=210)
+
+    Button(log,text='Register',font=('',10,'underline'),bg='white',fg='blue',command=register).place(x=170,y=210)
+
+    log.bind('<Return>', log_func)
+
+    log.mainloop()
     
-
+    
     #login function
     def log_func(*args):
 
@@ -70,28 +80,7 @@ def login():
                 else:
                     resp.configure(text='Wrong Password', fg='red')
             else:
-                resp.configure(text=f'Username {user} Does Not Exist', fg='red')
-
-
-    submit = Button(log, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=log_func,bd=0,fg='white')
-    submit.place(x=10, y=180)
-
-    Label(log, text='Dont\'t Have An Account.',bg='white').place(x=30,y=210)
-
-    Button(log,text='Register',font=('',10,'underline'),bg='white',fg='blue',command=register).place(x=170,y=210)
-
-    log.bind('<Return>', log_func)
-
-    log.mainloop()
-
-
-
-
-
-
-    
-
-
+                resp.configure(text=f'Username {user} Does Not Exist', fg='red')    
 #sign up page
 
 def register():
@@ -99,40 +88,26 @@ def register():
         log.destroy()
     except:
         pass
-
-    
-    
     global reg
     reg = Tk()
     reg.title('Register')
     reg.configure(bg='white')
     reg.geometry('300x300+220+170')
     reg.resizable(0,0)
-
     reg_label = Label(reg, text='Register',fg='black', width=20, height=1, font=('Arial Black',20,'bold'))
     reg_label.pack()
-
-
     n = Label(reg, text='Name :', font=('Arial Black',14,'bold'),bg='white')
     n.place(x=10,y=50)
-    
     name_entry = Entry(reg, font=('Arial Black',10,'bold'),  width=25,bg='powder blue')
     name_entry.place(x=10,y=80)
-
     u = Label(reg, text='Username :', font=('Arial Black',14,'bold'),bg='white')
     u.place(x=10,y=110)
-    
     user_entry = Entry(reg, font=('Arial Black',10,'bold'),  width=25,bg='powder blue')
     user_entry.place(x=10, y=140)
-
-
     p = Label(reg, text='New Password :', font=('Arial Black',14,'bold'),bg='white')
     p.place(x=10,y=170)
-    
     pass_entry = Entry(reg,show='*', font=('Arial Black',10,'bold'),  width=25,bg='powder blue')
     pass_entry.place(x=10, y=200)
-
-
     def reg_func(*args):
 
         f = open('resources/log_details.csv', 'r')
@@ -175,29 +150,13 @@ def register():
                 username_name = name
 
                 login()
-
-
-
-                
-
-
         else:
             mb.showerror('Register','Please Fill All The Fields.')
-        
-        
-
-        
-
     submit = Button(reg, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=reg_func,bd=0,fg='white')
     submit.place(x=10, y=240)
-
     Label(reg, text='Already Had An Account?',bg='white').place(x=30,y=275)
-
     Button(reg,text='Log_In',font=('',10,'underline'),bg='white',fg='blue',command=login).place(x=170,y=270)
-
     reg.bind('<Return>', reg_func)
-
-
     reg.mainloop()
 
 
