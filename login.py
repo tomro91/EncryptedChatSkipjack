@@ -32,8 +32,7 @@ def login():
     
     user_entry = Entry(log, font=('Arial Black',10,'bold'),  width=25,bg='powder blue')
     user_entry.place(x=10, y=80)
-
-
+    
     p = Label(log, text='Password :', font=('Arial Black',14,'bold'),bg='white')
     p.place(x=10,y=110)
     
@@ -58,16 +57,16 @@ def login():
         user = user_entry.get()
         #get password with hash
         input_pass = pass_entry.get()
-        h = sha256()
-        h.update(input_pass)
-        hash_pass = h.hexdigest()
-        print(hash_pass)
+        #h = sha256()
+        #h.update(input_pass)
+        #hash_pass = h.hexdigest()
+        #print(hash_pass)
         #validate user
         for i in l:
             print(i[1])
             if i[1] == user:
                 passw = i[2]
-                if hash_pass == passw:
+                if input_pass == passw:
                     username_name = i[0]
                     resp.configure(text=f'Login Successful\n Welcome {i[0]} ', fg='green')
                     client.main_func(i[0])
