@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import messagebox as mb
+from hashlib import sha256
 import client
 import _thread
 import random
@@ -57,13 +58,18 @@ def login():
             l.append(l1)
 
         user = user_entry.get()
-        password = pass_entry.get()
+        #get password with hash
+        input_pass = pass_entry.get()
+        h = sha256()
+        h.update(input_pass)
+        hash_pass = h.hexdigest()
+        print(hash_pass)
         #validate user
         for i in l:
             print(i[1])
             if i[1] == user:
                 passw = i[2]
-                if password == passw:
+                if hash_pass == passw:
                     username_name = i[0]
                     resp.configure(text=f'Login Successful\n Welcome {i[0]} ', fg='green')
                     client.main_func(i[0])
