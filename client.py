@@ -5,6 +5,9 @@ import socket
 import _thread
 import sys
 from csv import DictReader
+import skipjack as skip
+key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+sj = skip.SkipJack()
 #chat window of client
 def main_func(username):
 
@@ -48,13 +51,81 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
-    #encryption function-change
-    def encrypt(msg):
-        return "code"   
-    #decryption function-change          
-    def decrypt(msg):
-        return "word"                               
-   
+    # convert the text to a string with the ascii hex value of the word
+    def textToHexInt(text):
+        hex_text = list(text)
+        plain_text = "0x"
+        for i in range(len(hex_text)):
+            hex_text[i] = hex(ord(hex_text[i]))[2:]
+            plain_text += hex_text[i]
+        hex_int = int(plain_text, 16)
+    
+        return hex_int
+    
+    
+    # convert a hexadecimal int array to a string
+    def hexIntToText(hexInt):
+        encNum = str(hexInt)
+        text = ""
+        tempText = ""
+        i = 2
+        print(hexInt)
+        while i < (len(encNum)-1):
+            tempText += encNum[i]
+            tempText += encNum[i+1]
+            text += chr(int(tempText, 16))
+            tempText = ""
+            i += 2
+        text.join(text)
+        return text
+    
+    
+    def partPlaintext(text):
+        print("partPlaintext")
+        x = 8
+        ptPart = [text[y - x:y] for y in range(x, len(text) + x, x)]
+        print(ptPart)
+    
+        return ptPart
+    
+    def partCiphertext(text):
+        print("partCiphertext")
+        ctTemp = text.split("0x")
+        print(ctTemp)
+        ctPart = []
+        for i in range(1, len(ctTemp)):
+            ctPart.append("0x" + ctTemp[i])
+        print(ctPart)
+        return ctPart
+    
+
+    #encryption function
+    def encrypt(plainText, key):
+        ctFinal = ""
+        # a list of strings that each one holds 64-bit words (all together make the plaintext)
+        ptPart = partPlaintext(plainText.lower())
+        for i in range(len(ptPart)):
+            # turn the plaintext from a string to hexadecimal int
+            pt = textToHexInt(ptPart[i])
+            # send the plaintext and key to the skipjack class and encrypt it.
+            ct = sj.encrypt(pt, key)
+            ctFinal += str(hex(ct))
+        print("Cipher text: " + str(ctFinal))
+        return ctFinal 
+    #decryption function          
+    def decrypt(cipherText, key):
+        dtFinal = ""
+        # a list of strings that each one holds 64-bit words (all together make the ciphertext)
+        ctPart = partCiphertext(cipherText)
+        for i in range(len(ctPart)):
+            # send the ciphertext and key to the skipjack class and decrypt it.
+            dt = sj.decrypt(int(ctPart[i], 16), key)
+            # turn the decrypted text from a hexadecimal int to string
+            text = hexIntToText(hex(dt))
+            dtFinal += text
+        print("Decrypted text: " + dtFinal)
+        return dtFinal
+
     #send message in the chat
     def sendMessage (username,*args):
         f = open('resources/log_details.csv', 'r')
@@ -75,7 +146,7 @@ def main_func(username):
                     global msg1
                     msg1=msg_entry.get()
                     global msg2
-                    msg2=encrypt(msg1)
+                    msg2=encrypt(msg1,key)
                     msg = u + ' : '+msg2
                     global c
                     c.send(msg.encode('ascii'))
@@ -92,7 +163,7 @@ def main_func(username):
             x=msg.split(':')
             if len(x)==2:
                 global msg3
-                msg3=decrypt(x[1])
+                msg3=decrypt(x[1],key)
                 global msg4
                 msg4=x[0]+":"+msg3
                 
