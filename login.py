@@ -42,19 +42,7 @@ def login():
 
     resp = Label(log, text='',font=('Arial Black',10,'bold'),bg='white')
     resp.place(x=10, y=250)
-    submit = Button(log, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=log_func,bd=0,fg='white')
-    submit.place(x=10, y=180)
-
-    Label(log, text='Dont\'t Have An Account.',bg='white').place(x=30,y=210)
-
-    Button(log,text='Register',font=('',10,'underline'),bg='white',fg='blue',command=register).place(x=170,y=210)
-
-    log.bind('<Return>', log_func)
-
-    log.mainloop()
-    
-    
-    #login function
+     #login function
     def log_func(*args):
 
         f = open('resources/log_details.csv', 'r')
@@ -86,7 +74,20 @@ def login():
                 else:
                     resp.configure(text='Wrong Password', fg='red')
             else:
-                resp.configure(text=f'Username {user} Does Not Exist', fg='red')    
+                resp.configure(text=f'Username {user} Does Not Exist', fg='red')  
+    submit = Button(log, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=log_func,bd=0,fg='white')
+    submit.place(x=10, y=180)
+
+    Label(log, text='Dont\'t Have An Account.',bg='white').place(x=30,y=210)
+
+    Button(log,text='Register',font=('',10,'underline'),bg='white',fg='blue',command=register).place(x=170,y=210)
+
+    log.bind('<Return>', log_func)
+
+    log.mainloop()
+    
+    
+     
 #sign up page
 
 def register():
