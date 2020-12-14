@@ -4,6 +4,7 @@ from hashlib import sha256
 import client
 import _thread
 import random
+
 from csv import DictReader
 import csv
 import sys
@@ -79,7 +80,7 @@ def login():
     submit = Button(log, text='Submit',font=('Arial Black',10,'bold'), width=14, bg='green', command=log_func,bd=0,fg='white')
     submit.place(x=10, y=180)
 
-    Label(log, text='Dont\'t Have An Account.',bg='white').place(x=30,y=210)
+   
 
 
     log.bind('<Return>', log_func)
