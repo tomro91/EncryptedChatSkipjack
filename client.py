@@ -3,6 +3,7 @@ from tkinter import messagebox as mb
 import tkinter.scrolledtext as tks
 import socket
 import _thread
+from RSA_key_generator import *
 import sys
 from RSA_digital_signature import *
 from csv import DictReader
@@ -11,6 +12,13 @@ key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
 sj = skip.SkipJack()
 N = 160
 L = 1024
+message=""
+global privateKey
+privateKey=0
+global publicKey
+publicKey=0
+global n1
+n1=0
 #chat window of client
 def main_func(username):
 
@@ -20,8 +28,17 @@ def main_func(username):
 
     client_name = []
     client_name.append(username)        
-  
-        
+    f = open('resources/log_details.csv', 'r')
+    r = DictReader(f)
+    l = []
+    for row in r:
+            l1 = []
+            l1.append(row['name'])
+            l1.append(row['username'])
+            l1.append(row['password'])
+            l1.append(row['permission'])
+            l.append(l1)
+    
   #initializes the availble users
     def del_dups(l):
         dup = []
@@ -54,52 +71,8 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
-    # convert the text to a string with the ascii hex value of the word
-    def textToHexInt(text):
-        hex_text = list(text)
-        plain_text = "0x"
-        for i in range(len(hex_text)):
-            hex_text[i] = hex(ord(hex_text[i]))[2:]
-            plain_text += hex_text[i]
-        hex_int = int(plain_text, 16)
-    
-        return hex_int
-    
-    
-    # convert a hexadecimal int array to a string
-    def hexIntToText(hexInt):
-        encNum = str(hexInt)
-        text = ""
-        tempText = ""
-        i = 2
-        print(hexInt)
-        while i < (len(encNum)-1):
-            tempText += encNum[i]
-            tempText += encNum[i+1]
-            text += chr(int(tempText, 16))
-            tempText = ""
-            i += 2
-        text.join(text)
-        return text
-    
-    
-    def partPlaintext(text):
-        print("partPlaintext")
-        x = 8
-        ptPart = [text[y - x:y] for y in range(x, len(text) + x, x)]
-        print(ptPart)
-    
-        return ptPart
-    
-    def partCiphertext(text):
-        print("partCiphertext")
-        ctTemp = text.split("0x")
-        print(ctTemp)
-        ctPart = []
-        for i in range(1, len(ctTemp)):
-            ctPart.append("0x" + ctTemp[i])
-        print(ctPart)
-        return ctPart
+
+
     
 
     #encryption function
@@ -128,7 +101,17 @@ def main_func(username):
             dtFinal += text
         print("Decrypted text: " + dtFinal)
         return dtFinal
-
+    #send request to Generate Keys
+    def generateKeys():
+        
+        msg="generate"
+        global c
+        print(msg)
+        c.send(msg.encode('ascii'))
+        
+    def keysToSend():
+        publicKey,privateKey=generateKey(50)
+        return publicKey[1],privateKey[1],publicKey[0]
     #send message in the chat
     def sendMessage (username,*args):
         f = open('resources/log_details.csv', 'r')
@@ -146,6 +129,7 @@ def main_func(username):
             if i[0] == username:
                 print("hey"+i[3])
                 if i[3]=="1":
+                    
                     p, q, g = generate_params(L, N)
                     x, y = generate_keys(g, p, q)
                     
@@ -154,6 +138,9 @@ def main_func(username):
                     msg1=msg_entry.get()
                     M=str.encode(msg1, "ascii")
                     r, s = sign(M, p, q, g, x)
+                    
+                    #x-private key of sender,y-public key of sender
+                    #
                     global msg2
                     msg2=encrypt(msg1,key)
                     msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)
@@ -200,8 +187,6 @@ def main_func(username):
                 
                #client log out
             elif 'gone980' in msg:
-                
-                
                 msg = msg.split('@')
                 msg.pop(-1)
                 list_insert(msg)
@@ -210,16 +195,38 @@ def main_func(username):
             elif 'there is no premissions'in msg:
                
                messagebox.showinfo("information","User does not have premissions to send messages!") 
+            elif 'generate' in msg:
+                public,private,n=keysToSend()
+               
+                global  privateKey
+                privateKey=private
+                global  publicKey
+                publicKey=public
+                global  n1
+                n1=n
+                msg="keys:"+str(public)+":"+str(n1)
+                c.send(msg.encode('ascii'))
+            elif 'keys' in msg:
+                arr=msg.split(':')
+                publicKey=arr[1]
+                n1=arr[2]
+                sendCheck()#need to be replaced with the original send message
             elif 'WARNING' in msg:
                messagebox.showinfo("information","Someone changed your message!")  
             else:
                 t = text.get(1.0,END)
                 text.delete(1.0,END)
-                text.insert(INSERT,t+msg4+'\n')
+                text.insert(INSERT,t+msg+'\n')
                 text.yview('end')
                
-
-
+    #function that checks if the architecture is working-need to be removed in the end
+    def sendCheck():
+        print("message")
+        print(msg_entry.get())
+        print("n")
+        print(n1)
+        print("public key")
+        print(publicKey)
 
 
             
@@ -238,7 +245,7 @@ def main_func(username):
         _thread.start_new_thread(recievingMessage, (c,) )
 
 
-    #client GUI-chat window
+    ###########client GUI-chat window#####################
 
     win = Toplevel()
     win.geometry('530x400')
@@ -259,7 +266,7 @@ def main_func(username):
     msg_entry = Entry(win, font=('arial black',13),width=25)
     msg_entry.place(x=10,y=365)
 
-    send = Button(win, font=('arial black',10), text='Send',bd=0,bg='blue',fg='white',width=10,command=lambda : sendMessage(username))
+    send = Button(win, font=('arial black',10), text='Send',bd=0,bg='blue',fg='white',width=10,command=lambda : generateKeys())
     send.place(x=300,y=365)
 
     Label(win, font=('arial black',13),bg='blue',fg='white',text='Users',width=12).place(y=40,x=400)
