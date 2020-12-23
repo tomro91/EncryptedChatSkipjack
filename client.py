@@ -4,9 +4,12 @@ import tkinter.scrolledtext as tks
 import socket
 import _thread
 import sys
+import random
+import key as key
 from csv import DictReader
 import skipjack as skip
-key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+#plain_key = ('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
+key=key.Key.generate('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
 sj = skip.SkipJack()
 #chat window of client
 def main_func(username):
@@ -100,7 +103,7 @@ def main_func(username):
     
 
     #encryption function
-    def encrypt(plainText, key):
+    def encrypt(plainText,key):
         ctFinal = ""
         # a list of strings that each one holds 64-bit words (all together make the plaintext)
         ptPart = partPlaintext(plainText.lower())
