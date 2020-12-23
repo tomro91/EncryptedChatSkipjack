@@ -26,21 +26,7 @@ def generateKey(keySize):
    print('Private key:', privateKey)
    return (publicKey, privateKey)
 
-def makeKeyFiles(keySize):
-   # Creates two files 'x_pubkey.txt' and 'x_privkey.txt' 
-   #  (where x is the value in name) with the the n,e and d,e integers written in them,
-   # delimited by a comma.
   
-   publicKey, privateKey,n = generateKey(keySize)
-   print()
-   print('The public key is a %s and a %s digit number.' % (len(str(publicKey[0])), len(str(publicKey[1])))) 
-   
-   print()
-   print('The private key is a %s and a %s digit number.' % (len(str(publicKey[0])), len(str(publicKey[1]))))
-   print()
-   print(str(n))
-   
-   
    
 def RSAdecrypt(Key, number, cipher):
     decryption = [num ** Key % number for num in cipher]
@@ -98,7 +84,7 @@ def partCiphertext(text):
         return ctPart
 
 
-
+generateKey(1025)
        
 
    

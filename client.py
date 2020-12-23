@@ -39,7 +39,7 @@ def main_func(username):
             l1.append(row['permission'])
             l.append(l1)
     
-  #initializes the availble users
+    #initializes the availble users
     def del_dups(l):
         dup = []
         for i in l:
@@ -72,8 +72,6 @@ def main_func(username):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
 
-
-    
 
     #encryption function
     def encrypt(plainText, key):
