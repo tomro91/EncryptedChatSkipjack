@@ -4,13 +4,13 @@ import tkinter.scrolledtext as tks
 import socket
 import _thread
 import sys
-from RSA_digital_signature import *
+import random
+import key as key
 from csv import DictReader
 import skipjack as skip
-key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+#plain_key = ('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
+key=key.Key.generate('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
 sj = skip.SkipJack()
-N = 160
-L = 1024
 #chat window of client
 def main_func(username):
 
@@ -103,7 +103,7 @@ def main_func(username):
     
 
     #encryption function
-    def encrypt(plainText, key):
+    def encrypt(plainText,key):
         ctFinal = ""
         # a list of strings that each one holds 64-bit words (all together make the plaintext)
         ptPart = partPlaintext(plainText.lower())
@@ -134,7 +134,6 @@ def main_func(username):
         f = open('resources/log_details.csv', 'r')
         r = DictReader(f)
         l = []
-        
         for row in r:
             l1 = []
             l1.append(row['name'])
@@ -146,17 +145,12 @@ def main_func(username):
             if i[0] == username:
                 print("hey"+i[3])
                 if i[3]=="1":
-                    p, q, g = generate_params(L, N)
-                    x, y = generate_keys(g, p, q)
-                    
                     u = username.split()[0]
                     global msg1
                     msg1=msg_entry.get()
-                    M=str.encode(msg1, "ascii")
-                    r, s = sign(M, p, q, g, x)
                     global msg2
                     msg2=encrypt(msg1,key)
-                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)
+                    msg = u + ' : '+msg2
                     global c
                     c.send(msg.encode('ascii'))
                 else:
@@ -170,22 +164,11 @@ def main_func(username):
             msg=c.recv(2048).decode('ascii')
             print(msg)
             x=msg.split(':')
-            if len(x)==8:
-                r=int(x[2])
-                s=int(x[3])
-                p=int(x[4])
-                q=int(x[5])
-                g=int(x[6])
-                y=int(x[7])
-                
+            if len(x)==2:
                 global msg3
                 msg3=decrypt(x[1],key)
-                if verify(str.encode(msg3, "ascii"), r, s, p, q, g, y):
-                    print("all OK!")
-                    global msg4
-                    msg4=x[0]+":"+msg3
-                else:
-                    msg="WARNING!!" 
+                global msg4
+                msg4=x[0]+":"+msg3
                 
             
             #new client log in
@@ -209,9 +192,7 @@ def main_func(username):
                     client_name.append(i)
             elif 'there is no premissions'in msg:
                
-               messagebox.showinfo("information","User does not have premissions to send messages!") 
-            elif 'WARNING' in msg:
-               messagebox.showinfo("information","Someone changed your message!")  
+               messagebox.showinfo("information","User does not have premissions to send messages!")  
             else:
                 t = text.get(1.0,END)
                 text.delete(1.0,END)
