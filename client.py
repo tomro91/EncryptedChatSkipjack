@@ -8,24 +8,40 @@ import sys
 from RSA_digital_signature import *
 from csv import DictReader
 import skipjack as skip
-key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+
 sj = skip.SkipJack()
 N = 160
 L = 1024
-message=""
-global privateKey
-privateKey=0
-global publicKey
-publicKey=0
-global n1
-n1=0
+class keys:
+    def __init__(self):
+        self.privateKey=0
+        self.publicKey=0
+        self.n1=0
+        self.message=""
+        self.clientToConnect=None
+    def setSender(self,public,n1):
+        self.publicKey=public
+        
+        self.n1=n1
+    def setClient(self,client):
+        self.clientToConnect=client
+    def getClient(self):
+        return self.clientToConnect
+    def setReceiver(self,public,private,n1):
+        self.publicKey=public
+        self.privateKey=private
+        self.n1=n1
+    def setMessage(self,message):
+        self.message=message
+    def getKeys(self):
+        return self.publicKey,self.privateKey,self.n1
 #chat window of client
 def main_func(username):
 
     i = 3
     client = 0
     start = True
-
+    keys1=keys()
     client_name = []
     client_name.append(username)        
     f = open('resources/log_details.csv', 'r')
@@ -38,6 +54,7 @@ def main_func(username):
             l1.append(row['password'])
             l1.append(row['permission'])
             l.append(l1)
+            
     
     #initializes the availble users
     def del_dups(l):
@@ -55,7 +72,7 @@ def main_func(username):
     #log out function
     def log_out(username):
         to = username +',gone980'
-        c.send(to.encode('ascii'))
+        keys1.getClient().send(to.encode('ascii'))
         win.destroy()
 
         
@@ -103,15 +120,14 @@ def main_func(username):
     def generateKeys():
         
         msg="generate"
-        global c
-        print(msg)
-        c.send(msg.encode('ascii'))
+        
+        keys1.getClient().send(msg.encode('ascii'))
         
     def keysToSend():
-        publicKey,privateKey=generateKey(50)
+        publicKey,privateKey=generateKey(9)
         return publicKey[1],privateKey[1],publicKey[0]
     #send message in the chat
-    def sendMessage (username,*args):
+    def sendMessage (*args):
         f = open('resources/log_details.csv', 'r')
         r = DictReader(f)
         l = []
@@ -125,9 +141,16 @@ def main_func(username):
             l.append(l1)
         for i in l:
             if i[0] == username:
-                print("hey"+i[3])
+                
                 if i[3]=="1":
-                    
+                    key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+                    arr=[0]*10
+                    for k in range(len(arr)):
+                         
+                         c=RSAencrypt(keys1.getKeys()[1], keys1.getKeys()[2], key[k])
+                         arr[k]=c
+                    print("after encryption")     
+                    print(arr)
                     p, q, g = generate_params(L, N)
                     x, y = generate_keys(g, p, q)
                     
@@ -141,30 +164,54 @@ def main_func(username):
                     #
                     global msg2
                     msg2=encrypt(msg1,key)
-                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)
-                    global c
-                    c.send(msg.encode('ascii'))
+                    
+                    newArr=""
+                    
+                    for j in range(len(arr)):
+                          newArr=newArr+str(arr[j])
+                          newArr=newArr+","
+                        
+                    msg=""
+                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)+':'+newArr
+                    print(msg)
+                    
+                    keys1.getClient().send(msg.encode('ascii'))
                 else:
                     msg="no premissions to send messages"
-                    c.send(msg.encode('ascii'))
+                    keys1.getClient().send(msg.encode('ascii'))
                     
     #recieve message in the chat
     #need to add decryption
-    def recievingMessage (c): 
+    def recievingMessage (c):
+        
+        global n1
+        global privateKey
         while True :
             msg=c.recv(2048).decode('ascii')
             print(msg)
             x=msg.split(':')
-            if len(x)==8:
+            if len(x)==9:
                 r=int(x[2])
                 s=int(x[3])
                 p=int(x[4])
                 q=int(x[5])
                 g=int(x[6])
                 y=int(x[7])
+                arrMsg=x[8].split(',')
+                arrHex=[0]*10
+                for t in range(10):
+                     arrHex[t]=int(arrMsg[t]) 
+                print("after casting from string to int array")  
+                print(arrHex)     
                 
+                arr1=[0]*10
+                for k in range(len(arr1)):
+                     d=RSAdecrypt(keys1.getKeys()[0], keys1.getKeys()[2], arrHex[k])
+                     arr1[k]=d
+                print("after decryption")
+                print(arr1)
                 global msg3
-                msg3=decrypt(x[1],key)
+                msg3=decrypt(x[1],arr1)
                 if verify(str.encode(msg3, "ascii"), r, s, p, q, g, y):
                     print("all OK!")
                     global msg4
@@ -196,46 +243,41 @@ def main_func(username):
             elif 'generate' in msg:
                 public,private,n=keysToSend()
                
-                global  privateKey
-                privateKey=private
-                global  publicKey
-                publicKey=public
-                global  n1
-                n1=n
-                msg="keys:"+str(public)+":"+str(n1)
-                c.send(msg.encode('ascii'))
+               # global privateKey
+                keys1.setReceiver(public, private, n)
+                print(keys1.getKeys()[0])
+                print(keys1.getKeys()[1])
+                print(keys1.getKeys()[2])
+                msg="keys:"+str(keys1.getKeys()[0])+":"+str(keys1.getKeys()[2])
+                keys1.getClient().send(msg.encode('ascii'))
             elif 'keys' in msg:
+                print("herreeee")
                 arr=msg.split(':')
-                publicKey=arr[1]
-                n1=arr[2]
-                sendCheck()#need to be replaced with the original send message
+                keys1.setSender(int(arr[1]), int(arr[2]))
+                print(keys1.getKeys()[0])
+                print(keys1.getKeys()[1])
+                print(keys1.getKeys()[2])
+                sendMessage()
             elif 'WARNING' in msg:
                messagebox.showinfo("information","Someone changed your message!")  
             else:
                 t = text.get(1.0,END)
                 text.delete(1.0,END)
-                text.insert(INSERT,t+msg+'\n')
+                text.insert(INSERT,t+msg4+'\n')
                 text.yview('end')
                
-    #function that checks if the architecture is working-need to be removed in the end
-    def sendCheck():
-        print("message")
-        print(msg_entry.get())
-        print("n")
-        print(n1)
-        print("public key")
-        print(publicKey)
-
-
+    
             
     #Socket Creation
     def socketCreation (username):
+        #hereeee
         global c
         c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         host = '127.0.0.1'
         port = 5000
         c.connect((host,port))
+        keys1.setClient(c)
         msg = username + ',new980'
         c.send(msg.encode('ascii'))
         global client

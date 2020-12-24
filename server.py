@@ -59,4 +59,6 @@ while True:
     c,ad=s.accept()
     print('Connection Established')
     clients.append(c)
+    print('clients')
+    print(clients)
     _thread.start_new_thread(connectNewClient,(c,))
