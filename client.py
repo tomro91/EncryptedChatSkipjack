@@ -11,42 +11,18 @@ import skipjack as skip
 sj = skip.SkipJack()
 N = 160
 L = 1024
-<<<<<<< HEAD
-class keys:
-    def __init__(self):
-        self.privateKey=0
-        self.publicKey=0
-        self.n1=0
-        self.message=""
-        self.clientToConnect=None
-    def setSender(self,public,n1):
-        self.publicKey=public
-        
-        self.n1=n1
-    def setClient(self,client):
-        self.clientToConnect=client
-    def getClient(self):
-        return self.clientToConnect
-    def setReceiver(self,public,private,n1):
-        self.publicKey=public
-        self.privateKey=private
-        self.n1=n1
-    def setMessage(self,message):
-        self.message=message
-    def getKeys(self):
-        return self.publicKey,self.privateKey,self.n1
-=======
->>>>>>> parent of c047cca... start of crypt the key
+
+
 #chat window of client
 def main_func(username):
 
     i = 3
     client = 0
     start = True
-    keys1=keys()
+
     client_name = []
     client_name.append(username)        
-<<<<<<< HEAD
+
     f = open('resources/log_details.csv', 'r')
     r = DictReader(f)
     l = []
@@ -59,12 +35,10 @@ def main_func(username):
             l.append(l1)
             
     
-    #initializes the availble users
-=======
+
   
         
-  #initializes the availble users
->>>>>>> parent of c047cca... start of crypt the key
+
     def del_dups(l):
         dup = []
         for i in l:
@@ -96,9 +70,7 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
-<<<<<<< HEAD
 
-=======
     # convert the text to a string with the ascii hex value of the word
     def textToHexInt(text):
         hex_text = list(text)
@@ -146,7 +118,7 @@ def main_func(username):
         print(ctPart)
         return ctPart
     
->>>>>>> parent of c047cca... start of crypt the key
+
 
     #encryption function
     def encrypt(plainText, key):
@@ -174,7 +146,7 @@ def main_func(username):
             dtFinal += text
         print("Decrypted text: " + dtFinal)
         return dtFinal
-<<<<<<< HEAD
+
     #send request to Generate Keys
     def generateKeys():
         
@@ -185,9 +157,9 @@ def main_func(username):
     def keysToSend():
         publicKey,privateKey=generateKey(9)
         return publicKey[1],privateKey[1],publicKey[0]
-=======
 
->>>>>>> parent of c047cca... start of crypt the key
+
+
     #send message in the chat
     def sendMessage (*args):
         f = open('resources/log_details.csv', 'r')
@@ -205,17 +177,10 @@ def main_func(username):
             if i[0] == username:
                 
                 if i[3]=="1":
-<<<<<<< HEAD
+
                     key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
-                    arr=[0]*10
-                    for k in range(len(arr)):
-                         
-                         c=RSAencrypt(keys1.getKeys()[1], keys1.getKeys()[2], key[k])
-                         arr[k]=c
-                    print("after encryption")     
-                    print(arr)
-=======
->>>>>>> parent of c047cca... start of crypt the key
+                
+
                     p, q, g = generate_params(L, N)
                     x, y = generate_keys(g, p, q)
                     
@@ -227,20 +192,15 @@ def main_func(username):
                     global msg2
                     msg2=encrypt(msg1,key)
                     
-                    newArr=""
-                    
-                    for j in range(len(arr)):
-                          newArr=newArr+str(arr[j])
-                          newArr=newArr+","
-                        
+                   
                     msg=""
-                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)+':'+newArr
+                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)
                     print(msg)
                     
-                    keys1.getClient().send(msg.encode('ascii'))
+                    c.send(msg.encode('ascii'))
                 else:
                     msg="no premissions to send messages"
-                    keys1.getClient().send(msg.encode('ascii'))
+                    c.send(msg.encode('ascii'))
                     
     #recieve message in the chat
     #need to add decryption
@@ -248,32 +208,21 @@ def main_func(username):
         
         global n1
         global privateKey
+        key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
         while True :
             msg=c.recv(2048).decode('ascii')
             print(msg)
             x=msg.split(':')
-            if len(x)==9:
+            if len(x)==8:
                 r=int(x[2])
                 s=int(x[3])
                 p=int(x[4])
                 q=int(x[5])
                 g=int(x[6])
                 y=int(x[7])
-                arrMsg=x[8].split(',')
-                arrHex=[0]*10
-                for t in range(10):
-                     arrHex[t]=int(arrMsg[t]) 
-                print("after casting from string to int array")  
-                print(arrHex)     
                 
-                arr1=[0]*10
-                for k in range(len(arr1)):
-                     d=RSAdecrypt(keys1.getKeys()[0], keys1.getKeys()[2], arrHex[k])
-                     arr1[k]=d
-                print("after decryption")
-                print(arr1)
                 global msg3
-                msg3=decrypt(x[1],arr1)
+                msg3=decrypt(x[1],key)
                 if verify(str.encode(msg3, "ascii"), r, s, p, q, g, y):
                     print("all OK!")
                     global msg4
@@ -304,7 +253,7 @@ def main_func(username):
             elif 'there is no premissions'in msg:
                
                messagebox.showinfo("information","User does not have premissions to send messages!") 
-<<<<<<< HEAD
+
             elif 'generate' in msg:
                 public,private,n=keysToSend()
                
@@ -323,8 +272,7 @@ def main_func(username):
                 print(keys1.getKeys()[1])
                 print(keys1.getKeys()[2])
                 sendMessage()
-=======
->>>>>>> parent of c047cca... start of crypt the key
+
             elif 'WARNING' in msg:
                messagebox.showinfo("information","Someone changed your message!")  
             else:
@@ -332,16 +280,7 @@ def main_func(username):
                 text.delete(1.0,END)
                 text.insert(INSERT,t+msg4+'\n')
                 text.yview('end')
-               
-<<<<<<< HEAD
-    
-=======
 
-
-
-
->>>>>>> parent of c047cca... start of crypt the key
-            
     #Socket Creation
     def socketCreation (username):
         #hereeee
@@ -351,7 +290,6 @@ def main_func(username):
         host = '127.0.0.1'
         port = 5000
         c.connect((host,port))
-        keys1.setClient(c)
         msg = username + ',new980'
         c.send(msg.encode('ascii'))
         global client
