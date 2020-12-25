@@ -94,6 +94,11 @@ def StringToList(str1):
         
     # return string   
     return arr  
+def stringArrayToIntegerArray(arr1):
+    arr2=[0]*len(arr1)
+    for i in range(len(arr1)):
+        arr2[i]=(int(arr1[i],16))
+    return arr2
 def checkEquals(arr1,arr2):
     if len(arr1)!=len(arr2):
         return False

@@ -7,13 +7,13 @@ import sys
 from RSA_digital_signature import *
 from csv import DictReader
 import skipjack as skip
-
+from key import *
 sj = skip.SkipJack()
 N = 160
 L = 1024
 sizePQ=8
 keySize=8
-
+key1=Key()
 #chat window of client
 def main_func(username):
 
@@ -169,8 +169,9 @@ def main_func(username):
             if i[0] == username:
                 
                 if i[3]=="1":
-
-                    skipjackKey = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
+                    generatedKey=key1.generate()
+                    
+                    skipjackKey = stringArrayToIntegerArray(generatedKey)
                     #rsa encrypt the skipjack key
                     e,n=generate_public_params_RSA(sizePQ,keySize)
                     cipherKey=RSAEncrypt(e, n, skipjackKey)
