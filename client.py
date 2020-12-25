@@ -55,7 +55,7 @@ def main_func(username):
     #log out function
     def log_out(username):
         to = username +',gone980'
-        keys1.getClient().send(to.encode('ascii'))
+        c.send(to.encode('ascii'))
         win.destroy()
 
         
@@ -190,7 +190,7 @@ def main_func(username):
                     
                     msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)+":"+str(e)+":"+str(n)+":"+cipherKeyText
                     
-                    #print(msg)
+                   
                    
                     c.send(msg.encode('ascii'))
                 else:

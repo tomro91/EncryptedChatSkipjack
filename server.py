@@ -14,6 +14,7 @@ def connectNewClient(c):
   
      while True:
           msgf = c.recv(2048).decode('ascii')
+          print("msg",msgf)
           #new client connect to chat app
           if 'new980' in msgf:
              msg = msgf.split(',')[0]
