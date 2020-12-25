@@ -4,13 +4,16 @@ import tkinter.scrolledtext as tks
 import socket
 import _thread
 import sys
-import random
-import key as key
+from RSA_digital_signature import *
 from csv import DictReader
 import skipjack as skip
-#plain_key = ('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
-key=key.Key.generate('0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11')
+from key import *
 sj = skip.SkipJack()
+N = 160
+L = 1024
+sizePQ=8
+keySize=8
+key1=Key()
 #chat window of client
 def main_func(username):
 
@@ -20,9 +23,23 @@ def main_func(username):
 
     client_name = []
     client_name.append(username)        
+
+    f = open('resources/log_details.csv', 'r')
+    r = DictReader(f)
+    l = []
+    for row in r:
+            l1 = []
+            l1.append(row['name'])
+            l1.append(row['username'])
+            l1.append(row['password'])
+            l1.append(row['permission'])
+            l.append(l1)
+            
+    
+
   
         
-  #initializes the availble users
+
     def del_dups(l):
         dup = []
         for i in l:
@@ -54,6 +71,7 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
+
     # convert the text to a string with the ascii hex value of the word
     def textToHexInt(text):
         hex_text = list(text)
@@ -102,8 +120,9 @@ def main_func(username):
         return ctPart
     
 
+
     #encryption function
-    def encrypt(plainText,key):
+    def encrypt(plainText, key):
         ctFinal = ""
         # a list of strings that each one holds 64-bit words (all together make the plaintext)
         ptPart = partPlaintext(plainText.lower())
@@ -129,11 +148,16 @@ def main_func(username):
         print("Decrypted text: " + dtFinal)
         return dtFinal
 
+  
+
+
     #send message in the chat
-    def sendMessage (username,*args):
+    def sendMessage (*args):
+       
         f = open('resources/log_details.csv', 'r')
         r = DictReader(f)
         l = []
+        
         for row in r:
             l1 = []
             l1.append(row['name'])
@@ -143,44 +167,90 @@ def main_func(username):
             l.append(l1)
         for i in l:
             if i[0] == username:
-                print("hey"+i[3])
+                
                 if i[3]=="1":
+                    generatedKey=key1.generate()
+                    
+                    skipjackKey = stringArrayToIntegerArray(generatedKey)
+                    #rsa encrypt the skipjack key
+                    e,n=generate_public_params_RSA(sizePQ,keySize)
+                    cipherKey=RSAEncrypt(e, n, skipjackKey)
+                    cipherKeyText=listToString(cipherKey)
+                    #digital signature
+                    p, q, g = generate_params_digital_signature(L, N)
+                    x, y = generate_keys(g, p, q)
+                    
                     u = username.split()[0]
                     global msg1
                     msg1=msg_entry.get()
+                    M=str.encode(msg1, "ascii")
+                    r, s = sign(M, p, q, g, x)
                     global msg2
-                    msg2=encrypt(msg1,key)
-                    msg = u + ' : '+msg2
-                    global c
+                    msg2=encrypt(msg1,skipjackKey)
+                    
+                    msg = u + ' : '+msg2+':'+str(r)+':'+str(s)+':'+str(p)+':'+str(q)+':'+str(g)+':'+str(y)+":"+str(e)+":"+str(n)+":"+cipherKeyText
+                    
+                   
+                   
                     c.send(msg.encode('ascii'))
                 else:
                     msg="no premissions to send messages"
                     c.send(msg.encode('ascii'))
-                    
+             
+  
+              
     #recieve message in the chat
     #need to add decryption
-    def recievingMessage (c): 
+    def recievingMessage (c):
+        
+        global n1
+        global privateKey
+        key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
         while True :
             msg=c.recv(2048).decode('ascii')
-            print(msg)
-            x=msg.split(':')
-            if len(x)==2:
-                global msg3
-                msg3=decrypt(x[1],key)
-                global msg4
-                msg4=x[0]+":"+msg3
-                
+            #print(msg)
             
-            #new client log in
-            if 'new980' in msg:
+            x=msg.split(':')
+            if len(x)==11:
+                
+                r=int(x[2])
+                s=int(x[3])
+                p=int(x[4])
+                q=int(x[5])
+                g=int(x[6])
+                y=int(x[7])
+                e=int(x[8])
+                n=int(x[9])
+                              
+                encryptedSkipjackey=StringToList(x[10])
+                d=generate_private_params_RSA(e,n)
+                decryptedSkipjackey=RSADecrypt(d, n, encryptedSkipjackey)
+                print(checkEquals(key, decryptedSkipjackey))
+                
+                global msg3
+                msg3=decrypt(x[1],decryptedSkipjackey)
+                if verify(str.encode(msg3, "ascii"), r, s, p, q, g, y):
+                    print("all OK!")
+                    global msg4
+                    msg4=x[0]+":"+msg3
+                    t = text.get(1.0,END)
+                    text.delete(1.0,END)
+                    text.insert(INSERT,t+msg4+'\n')
+                    text.yview('end')  
+                else:
+                    messagebox.showinfo("information","Someone changed your message!") 
+                
+            #new client log in    
+            elif 'new980' in msg:
                 
                 msg = msg.split('@')
                 msg.pop(-1)
                 list_insert(msg)
                 for i in msg:
-                    client_name.append(i)
+                    client_name.append(i) 
+          
                
-                
+ 
                #client log out
             elif 'gone980' in msg:
                 
@@ -192,20 +262,17 @@ def main_func(username):
                     client_name.append(i)
             elif 'there is no premissions'in msg:
                
-               messagebox.showinfo("information","User does not have premissions to send messages!")  
-            else:
-                t = text.get(1.0,END)
-                text.delete(1.0,END)
-                text.insert(INSERT,t+msg4+'\n')
-                text.yview('end')
-               
-
-
+               messagebox.showinfo("information","User does not have premissions to send messages!") 
 
 
             
+                
+           
+               
+            
     #Socket Creation
     def socketCreation (username):
+        #hereeee
         global c
         c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)

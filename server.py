@@ -14,6 +14,7 @@ def connectNewClient(c):
   
      while True:
           msgf = c.recv(2048).decode('ascii')
+          print("msg",msgf)
           #new client connect to chat app
           if 'new980' in msgf:
              msg = msgf.split(',')[0]
@@ -46,4 +47,6 @@ while True:
     c,ad=s.accept()
     print('Connection Established')
     clients.append(c)
+    print('clients')
+    print(clients)
     _thread.start_new_thread(connectNewClient,(c,))
