@@ -71,25 +71,40 @@ def generateLargePrime(keysize = 1024):
       num = random.randrange(2**(keysize-1), 2**(keysize))
       if isPrime(num):
          return num
+def listToString(arr):  
+    
+    # initialize an empty string 
+    str1 = ""  
+    
+    # traverse in the string   
+    for index in range(len(arr)-1):  
+        str1 +=str(arr[index])  +","
+    str1+=str(arr[index+1])
+    return str1
+def StringToList(str1):  
+    print(str1)
+    # initialize an empty string 
+    
+    arr1=str1.split(',')
+    arr=[0]*len(arr1)
+    print(arr1)
+    # traverse in the string   
+    for index in range(len(arr1)):  
+        arr[index]=int(arr1[index])
+        
+    # return string   
+    return arr  
+def checkEquals(arr1,arr2):
+    if len(arr1)!=len(arr2):
+        return False
+    for i in range(len(arr1)):
+        if arr1[i]!=arr2[i]:
+            return False
+    return True
 #=======Math functions-End==========
 
 #=======RSA functions============
-'''
-def generatePrivateKey(publicKey,n):
-   # Step 1: Create two prime numbers, p and q. Calculate n = p * q.
 
-   
-   
-   # Step 3: Calculate d, the mod inverse of e.
-   print('Calculating d that is mod inverse of e...')
-   d = findModInverse(e, (p - 1) * (q - 1))
-   publicKey = (n, e)
-   privateKey = (n, d)
-   print('Public key:', publicKey)
-   print('Private key:', privateKey)
-   return (publicKey, privateKey)     
-
-'''
 def generate_p_q_for_RSA(size):
    print('Generating p prime...')
    p = generateLargePrime(size)
@@ -108,7 +123,12 @@ def generate_public_params_RSA(sizePQ,keySize):
 def generate_private_params_RSA(e,n):
     d = findModInverse(e, phi_func(n))
     return d
-
+def RSAEncrypt(Key, n, text):
+    cipher = [((num) ** Key) % n for num in text]
+    return cipher 
+def RSADecrypt(Key, n, cipher):
+    decryption = [num ** Key % n for num in cipher]
+    return decryption
 
 
 
@@ -173,12 +193,7 @@ def generate_params_digital_signature(L, N):
     p, q = generate_p_q(L, N)
     g = generate_g(p, q)
     return p, q, g
-def RSAEncrypt(Key, n, text):
-    cipher = [((num) ** Key) % n for num in text]
-    return cipher 
-def RSADecrypt(Key, n, cipher):
-    decryption = [num ** Key % n for num in cipher]
-    return decryption
+
 
  
 
@@ -220,7 +235,7 @@ def validate_params1(p, q):
         return True
      return False
 def validate_params2(p, q,g):
-    if powmod(g, q, p) == 1 and g > 1 and (p - 1) % q:
+    if powmod(g, q, p) == 1 or g > 1 and (p - 1) % q:
         return True
     return False
 #validate that the given p,q,g are legal
@@ -236,28 +251,4 @@ def validate_sign(r, s, q):
         return False
     return True
 #=======Digital Signature functions-end============
-
-#=======Main============
-key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
-e,n=generate_public_params_RSA(8,8)
-d=generate_private_params_RSA(e,n)
-cipherArray=RSAEncrypt(e, n, key)
-DecryptedArray=RSADecrypt(d, n, cipherArray)
-print(DecryptedArray)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
