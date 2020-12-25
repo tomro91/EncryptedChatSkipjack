@@ -1,8 +1,6 @@
 #Server side
 import _thread
 import socket
-global currentClient
-currentClient=None
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)  
 s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 host="localhost"
@@ -16,7 +14,6 @@ def connectNewClient(c):
   
      while True:
           msgf = c.recv(2048).decode('ascii')
-          print("message in server "+msgf)
           #new client connect to chat app
           if 'new980' in msgf:
              msg = msgf.split(',')[0]
@@ -36,22 +33,12 @@ def connectNewClient(c):
           elif 'no premissions to send messages' in msgf:
               msg1= "there is no premissions"
               c.send(msg1.encode('ascii'))
-         #sender requests from the receivers to generate keys
-          elif 'generate' in msgf:
-             sendToAll(msgf,c)
-         #receiver sends to the sender the public key and the n
-          elif 'keys' in msgf:
-             currentClient.send(msgf.encode('ascii'))
-             
          #client send message in the chat
           else:
              msg =msgf
              sendToAll(msg,c)
 #function that send message to all clients
 def sendToAll(msg,con):
-    if 'generate' in msg:
-        global currentClient
-        currentClient=con
     for client in clients:
         client.send(msg.encode('ascii')) 
         

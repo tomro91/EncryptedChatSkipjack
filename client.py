@@ -3,7 +3,6 @@ from tkinter import messagebox as mb
 import tkinter.scrolledtext as tks
 import socket
 import _thread
-from RSA_key_generator import *
 import sys
 from RSA_digital_signature import *
 from csv import DictReader
@@ -12,6 +11,7 @@ import skipjack as skip
 sj = skip.SkipJack()
 N = 160
 L = 1024
+<<<<<<< HEAD
 class keys:
     def __init__(self):
         self.privateKey=0
@@ -35,6 +35,8 @@ class keys:
         self.message=message
     def getKeys(self):
         return self.publicKey,self.privateKey,self.n1
+=======
+>>>>>>> parent of c047cca... start of crypt the key
 #chat window of client
 def main_func(username):
 
@@ -44,6 +46,7 @@ def main_func(username):
     keys1=keys()
     client_name = []
     client_name.append(username)        
+<<<<<<< HEAD
     f = open('resources/log_details.csv', 'r')
     r = DictReader(f)
     l = []
@@ -57,6 +60,11 @@ def main_func(username):
             
     
     #initializes the availble users
+=======
+  
+        
+  #initializes the availble users
+>>>>>>> parent of c047cca... start of crypt the key
     def del_dups(l):
         dup = []
         for i in l:
@@ -88,7 +96,57 @@ def main_func(username):
             for j in range(0,len(m)):
                 client_name.append(m[j])
                 active_users.insert(i+1,m[j])
+<<<<<<< HEAD
 
+=======
+    # convert the text to a string with the ascii hex value of the word
+    def textToHexInt(text):
+        hex_text = list(text)
+        plain_text = "0x"
+        for i in range(len(hex_text)):
+            hex_text[i] = hex(ord(hex_text[i]))[2:]
+            plain_text += hex_text[i]
+        hex_int = int(plain_text, 16)
+    
+        return hex_int
+    
+    
+    # convert a hexadecimal int array to a string
+    def hexIntToText(hexInt):
+        encNum = str(hexInt)
+        text = ""
+        tempText = ""
+        i = 2
+        print(hexInt)
+        while i < (len(encNum)-1):
+            tempText += encNum[i]
+            tempText += encNum[i+1]
+            text += chr(int(tempText, 16))
+            tempText = ""
+            i += 2
+        text.join(text)
+        return text
+    
+    
+    def partPlaintext(text):
+        print("partPlaintext")
+        x = 8
+        ptPart = [text[y - x:y] for y in range(x, len(text) + x, x)]
+        print(ptPart)
+    
+        return ptPart
+    
+    def partCiphertext(text):
+        print("partCiphertext")
+        ctTemp = text.split("0x")
+        print(ctTemp)
+        ctPart = []
+        for i in range(1, len(ctTemp)):
+            ctPart.append("0x" + ctTemp[i])
+        print(ctPart)
+        return ctPart
+    
+>>>>>>> parent of c047cca... start of crypt the key
 
     #encryption function
     def encrypt(plainText, key):
@@ -116,6 +174,7 @@ def main_func(username):
             dtFinal += text
         print("Decrypted text: " + dtFinal)
         return dtFinal
+<<<<<<< HEAD
     #send request to Generate Keys
     def generateKeys():
         
@@ -126,6 +185,9 @@ def main_func(username):
     def keysToSend():
         publicKey,privateKey=generateKey(9)
         return publicKey[1],privateKey[1],publicKey[0]
+=======
+
+>>>>>>> parent of c047cca... start of crypt the key
     #send message in the chat
     def sendMessage (*args):
         f = open('resources/log_details.csv', 'r')
@@ -143,6 +205,7 @@ def main_func(username):
             if i[0] == username:
                 
                 if i[3]=="1":
+<<<<<<< HEAD
                     key = [0x00, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]
                     arr=[0]*10
                     for k in range(len(arr)):
@@ -151,6 +214,8 @@ def main_func(username):
                          arr[k]=c
                     print("after encryption")     
                     print(arr)
+=======
+>>>>>>> parent of c047cca... start of crypt the key
                     p, q, g = generate_params(L, N)
                     x, y = generate_keys(g, p, q)
                     
@@ -159,9 +224,6 @@ def main_func(username):
                     msg1=msg_entry.get()
                     M=str.encode(msg1, "ascii")
                     r, s = sign(M, p, q, g, x)
-                    
-                    #x-private key of sender,y-public key of sender
-                    #
                     global msg2
                     msg2=encrypt(msg1,key)
                     
@@ -232,6 +294,8 @@ def main_func(username):
                 
                #client log out
             elif 'gone980' in msg:
+                
+                
                 msg = msg.split('@')
                 msg.pop(-1)
                 list_insert(msg)
@@ -240,6 +304,7 @@ def main_func(username):
             elif 'there is no premissions'in msg:
                
                messagebox.showinfo("information","User does not have premissions to send messages!") 
+<<<<<<< HEAD
             elif 'generate' in msg:
                 public,private,n=keysToSend()
                
@@ -258,6 +323,8 @@ def main_func(username):
                 print(keys1.getKeys()[1])
                 print(keys1.getKeys()[2])
                 sendMessage()
+=======
+>>>>>>> parent of c047cca... start of crypt the key
             elif 'WARNING' in msg:
                messagebox.showinfo("information","Someone changed your message!")  
             else:
@@ -266,7 +333,14 @@ def main_func(username):
                 text.insert(INSERT,t+msg4+'\n')
                 text.yview('end')
                
+<<<<<<< HEAD
     
+=======
+
+
+
+
+>>>>>>> parent of c047cca... start of crypt the key
             
     #Socket Creation
     def socketCreation (username):
@@ -285,7 +359,7 @@ def main_func(username):
         _thread.start_new_thread(recievingMessage, (c,) )
 
 
-    ###########client GUI-chat window#####################
+    #client GUI-chat window
 
     win = Toplevel()
     win.geometry('530x400')
@@ -306,7 +380,7 @@ def main_func(username):
     msg_entry = Entry(win, font=('arial black',13),width=25)
     msg_entry.place(x=10,y=365)
 
-    send = Button(win, font=('arial black',10), text='Send',bd=0,bg='blue',fg='white',width=10,command=lambda : generateKeys())
+    send = Button(win, font=('arial black',10), text='Send',bd=0,bg='blue',fg='white',width=10,command=lambda : sendMessage(username))
     send.place(x=300,y=365)
 
     Label(win, font=('arial black',13),bg='blue',fg='white',text='Users',width=12).place(y=40,x=400)
