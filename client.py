@@ -6,6 +6,7 @@ import _thread
 import sys
 from RSA_digital_signature import *
 from csv import DictReader
+import csv
 import skipjack as skip
 from key import *
 sj = skip.SkipJack()
@@ -23,7 +24,7 @@ def main_func(username):
 
     client_name = []
     client_name.append(username)        
-
+    
     f = open('resources/log_details.csv', 'r')
     r = DictReader(f)
     l = []
@@ -35,8 +36,38 @@ def main_func(username):
             l1.append(row['permission'])
             l.append(l1)
             
-    
-
+    def loadMessages():
+  
+        f = open('resources/message_details.csv', 'r')
+        r = DictReader(f)
+        l = []
+        for row in r:
+                l1 = []
+                l1.append(row['username'])
+                l1.append(row['encryptedMsg'])
+                l1.append(int(row['public']))
+                l1.append(int(row['n']))
+                l1.append(row['cipherKey'])
+                l.append(l1)
+        arrKey=[0]*10
+        for i in l:   
+            u=i[0]
+            encrypt=i[1]
+            e=i[2]
+            n=i[3]
+            arr=i[4].split(',')
+            for j in range(10):
+                arrKey[j]=int(arr[j])
+            
+            d=generate_private_params_RSA(e,n)
+            decryptKey=RSADecrypt(d, n, arrKey)
+            
+            msgDecrypt=u+":"+decrypt(encrypt,decryptKey)
+            print("the message from db is:",msgDecrypt)
+            t = text.get(1.0,END)
+            text.delete(1.0,END)
+            text.insert(INSERT,t+msgDecrypt+'\n')
+            text.yview('end')  
   
         
 
@@ -231,6 +262,10 @@ def main_func(username):
                 msg3=decrypt(x[1],decryptedSkipjackey)
                 if verify(str.encode(msg3, "ascii"), r, s, p, q, g, y):
                     print("all OK!")
+                    to_write = [x[0],x[1],e,n,encryptedSkipjackey]
+                    with open('resources/message_details.csv','a') as csvFile:
+                     writer = csv.writer(csvFile)
+                     writer.writerow(to_write)
                     global msg4
                     msg4=x[0]+":"+msg3
                     t = text.get(1.0,END)
@@ -368,7 +403,7 @@ def main_func(username):
 
     def key_press(*args):
         sendMessage(username)
-    
+    loadMessages()
     win.bind('<Return>',key_press)
 
     _thread.start_new_thread(socketCreation, (username,) )

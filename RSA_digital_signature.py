@@ -1,6 +1,7 @@
 from random import randrange
 from hashlib import sha256
 import random
+from csv import DictReader
 from gmpy2 import xmpz, to_binary, invert, powmod, is_prime
 #=======Math functions============
 def gcd(a, b):
@@ -82,12 +83,12 @@ def listToString(arr):
     str1+=str(arr[index+1])
     return str1
 def StringToList(str1):  
-    print(str1)
+    
     # initialize an empty string 
     
     arr1=str1.split(',')
     arr=[0]*len(arr1)
-    print(arr1)
+   
     # traverse in the string   
     for index in range(len(arr1)):  
         arr[index]=int(arr1[index])
@@ -111,9 +112,9 @@ def checkEquals(arr1,arr2):
 #=======RSA functions============
 
 def generate_p_q_for_RSA(size):
-   print('Generating p prime...')
+   
    p = generateLargePrime(size)
-   print('Generating q prime...')
+  
    q = generateLargePrime(size)
    return p,q
 def generate_public_params_RSA(sizePQ,keySize):
@@ -256,4 +257,3 @@ def validate_sign(r, s, q):
         return False
     return True
 #=======Digital Signature functions-end============
-
