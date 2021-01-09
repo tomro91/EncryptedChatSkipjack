@@ -5,7 +5,7 @@ class SkipJack:
         # F is an 8-bit S-box
         self.F = []
         self.defineF()
-        #w1, w2, w3, w4 are 16-bit integers
+        # w1, w2, w3, w4 are 16-bit integers
         self.w1 = 0
         self.w2 = 0
         self.w3 = 0
@@ -29,16 +29,27 @@ class SkipJack:
                   0x08, 0x77, 0x11, 0xbe, 0x92, 0x4f, 0x24, 0xc5, 0x32, 0x36, 0x9d, 0xcf, 0xf3, 0xa6, 0xbb, 0xac,
                   0x5e, 0x6c, 0xa9, 0x13, 0x57, 0x25, 0xb5, 0xe3, 0xbd, 0xa8, 0x3a, 0x01, 0x05, 0x59, 0x2a, 0x46]
 
-    #plaintext is a 64-bit integer
-    #key is a list of 16-bytes
+    # plaintext is a 64-bit integer
     def encrypt(self, plaintext, key):
         self.splitWord(plaintext)
 
         for count in range (1, 33):
-            if (1<= count <= 8) or (17 <= count <= 24):
-                self.A(count,key)
-            if(9<= count <= 16) or (25<= count <= 32):
-                self.B(count, key)
+            orig1 = self.w1
+            orig2 = self.w2
+            orig3 = self.w3
+            if (1 <= count <= 8) or (17 <= count <= 24):
+                # Rule A
+                self.w1 = self.G(count, key, orig1) ^ self.w4 ^ count  # w1 = G(w1) xor count xor w4
+                self.w2 = self.G(count, key, orig1) # w2 = G(w1)
+                self.w3 = orig2
+                self.w4 = orig3
+
+            if(9 <= count <= 16) or (25<= count <= 32):
+                # Rule B
+                self.w1 = self.w4
+                self.w2 = self.G(count, key, orig1) # w2 = G(w1)
+                self.w3 = orig1 ^ orig2 ^ count # w3 = w1 xor w2 xor count
+                self.w4 = orig3
 
         return self.appendWords()
 
@@ -46,75 +57,53 @@ class SkipJack:
         self.splitWord(ciphertext)
 
         for count in reversed(range(1, 33)):
+            orig1 = self.w1
             if(25<= count <= 32) or (9<= count<= 16):
-                self.Binv(count, key)
+                # Rule B inverse
+                self.w1 = self.Ginv(count, key, self.w2) # w1 = G inverse (w2)
+                self.w2 = self.Ginv(count, key, self.w2) ^ self.w3 ^ count # w2 = G inverse (w2) xor w3 xor count
+                self.w3 = self.w4
+                self.w4 = orig1
+
             if(17<= count<=24) or (1<= count <= 8):
-                self.Ainv(count, key)
+                # Rule A inverse
+                orig2 = self.w2
+                self.w1 = self.Ginv(count, key, orig2) # w1 = G inverse (w2)
+                self.w2 = self.w3
+                self.w3 = self.w4
+                self.w4 = orig1 ^ orig2 ^ count # w4 = w1 xor w2 xor count
+
 
         return self.appendWords()
 
-    def A(self, count, key):
-        c1 = self.w1
-        c2 = self.w2
-        c3 = self.w3
-        #w1 = xor (G, count and w4)
-        self.w1 = self.G(count, key, c1) ^ self.w4 ^ count
-        self.w2 = self.G(count, key, c1)
-        self.w3 = c2
-        self.w4 = c3
-
-    def Ainv(self, count, key):
-        c1 = self.w1
-        c2 = self.w2
-        self.w1 = self.Ginv(count, key, c2)
-        self.w2 = self.w3
-        self.w3 = self.w4
-        self.w4 = c1 ^ c2 ^ count
-
-    def B(self, count, key):
-        c1 = self.w1
-        c2 = self.w2
-        c3 = self.w3
-        self.w1 = self.w4
-        self.w2 = self.G(count, key, c1)
-        # w3 = xor (w1, w2 and count)
-        self.w3 = c1 ^ c2 ^ count
-        self.w4 = c3
-
-    def Binv(self, count, key):
-        c1 = self.w1
-        self.w1 = self.Ginv(count, key, self.w2)
-        self.w2 = self.Ginv(count, key, self.w2) ^ self.w3 ^ count
-        self.w3 = self.w4
-        self.w4 = c1
-
-    #w is a 16-bit integer
+    # w is a 16-bit integer
     def G(self, count, key, w):
         g = [0]*6
+        # split w to two 6 bit parts.
         g[0] = (w >> 8 ) & 0xff
         g[1] = w & 0xff
-        j = (4 * (count - 1)) % 10
+        j = (4 * (count - 1)) % 10 # index for key
 
-        for i in range(2,6): # gives 1 = 2, 3, 4, 5
+        for i in range(2,6): # gives i = 2, 3, 4, 5
             g[i] = self.F[g[i-1] ^ key[j]] ^ g[i - 2]
             j = (j + 1) % 10
 
-        return (g[4] << 8) | g[5]
+        return (g[4] << 8) | g[5] # returns g[4]g[5]
 
     def Ginv(self, count, key, w):
         g = [0]*6
+        # split w to two 6 bit parts.
         g[4] = (w >> 8) & 0xff
         g[5] = w & 0xff
-        j= (4 *(count-1) + 3)%10
+        j = (4 *(count-1) + 3) % 10 # index for key
 
-        for i in reversed(range(4)):# gives i= 3, 2, 1, 0
+        for i in reversed(range(4)): # gives i= 3, 2, 1, 0
             g[i] = self.F[g[i+1]^key[j]] ^ g[i+2]
-            j= (j-1)%10
+            j = (j-1) % 10
 
-        return (g[0] << 8)|g[1]
+        return (g[0] << 8)|g[1] # returns g[0]g[1]
 
-
-    #append the four 16-bit words w1,w2,w3,w4 to return a 64-bit word
+    # append the four 16-bit words w1,w2,w3,w4 to return a 64-bit word
     def appendWords(self):
         x1 = self.w1 << 3*16
         x2 = self.w2 << 2*16
@@ -123,9 +112,10 @@ class SkipJack:
 
         return x1 | x2 | x3 | x4
 
-    #w is a 64-bit word. This function splits w into four 16-bit words which are stored in w1,w2,w3,w4
+    # w is a 64-bit word. This function splits w into four 16-bit words which are stored in w1,w2,w3,w4
     def splitWord(self, w):
         self.w1 = (w >> (16*3)) & 0xffff
         self.w2 = (w >> (16*2)) & 0xffff
         self.w3 = (w >> (16*1)) & 0xffff
         self.w4 = w & 0xffff
+
